@@ -77,6 +77,33 @@
                                     <input name="fillOpacity" type="number" min="0" max="1" step="0.1" value="0.3">
                                 </td>
                             </tr>
+                            <tr class="style-row">
+                                <th>常态图标：</th>
+                                <td>
+                                    <select name="defaultIcon">
+                                        <option value="" disabled selected>请选择</option>
+                                        <option value="Default" data-icon="./css/images/marker-icon.png">Default</option>
+                                        <option value="Air" data-icon="./css/images/icon/Air.png">Air</option>
+                                        <option value="Airport" data-icon="./css/images/icon/Airport.png">Airport</option>
+                                        <option value="Fire" data-icon="./css/images/icon/Fire.png">Fire</option>
+                                        <option value="Gas" data-icon="./css/images/icon/Gas.png">Gas</option>
+                                        <option value="Water" data-icon="./css/images/icon/Water.png">Water</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>报警图标：</th>
+                                <td>
+                                    <select name="warmIcon">
+                                        <option value="" disabled selected>请选择</option>
+                                        <option value="Air" data-icon="./css/images/icon/Air.png">Air</option>
+                                        <option value="Airport" data-icon="./css/images/icon/Airport.png">Airport</option>
+                                        <option value="FireStation" data-icon="./css/images/icon/Fire_Station.png">FireStation</option>
+                                        <option value="Gas" data-icon="./css/images/icon/Gas.png">Gas</option>
+                                        <option value="Water" data-icon="./css/images/icon/Water.png">Water</option>
+                                    </select>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                     <a class="waves-effect waves-light btn" onclick="javascript:save();">
@@ -85,7 +112,6 @@
             </li>
         </ul>
     </div>
-
 
     <script src="./js/leaflet-src.js"></script>
     <!-- 地图标注 -->
@@ -99,7 +125,8 @@
         var baiduTile = new L.TileLayer(baseUrl, {
             id: '788865972'
         });
-        var rbiIcon = {};
+        var rbiIcon = {},
+            sideNav;
 
 
         // 初始化地图
@@ -115,17 +142,13 @@
         map.zoomControl.setPosition("bottomright")
 
         // 加载数据
-        let i = 1;
         var drawnItems =
             L.featureGroup()
-            .on('click', showSideConfig)
+            .on('click', showConfig)
             .addTo(map);
         var geoJsonLayer = L.geoJson(geoJsonData, {
             onEachFeature: function (feature, layer) {
                 layer.addTo(drawnItems);
-
-                // layer._leaflet_id = feature.properties.id;
-                i += 1;
             },
             style: function (feature) {
                 return feature.properties;
@@ -139,7 +162,8 @@
             },
             draw: {
                 //禁用圆形标记
-                circlemarker: false
+                circlemarker: false,
+                circle: false
             }
         }));
 
@@ -157,7 +181,6 @@
                     console.log(drawnItems.toGeoJSON());
                 }
                 container.appendChild(saveEle);
-                saveEle
                 return container;
             }
         });
@@ -166,64 +189,99 @@
         // 事件响应
         map.on(L.Draw.Event.CREATED, function (e) {
             var layer = e.layer;
+            layer.feature = layer.toGeoJSON();
             layer.addTo(drawnItems);
+
+            // 默认展开配置项
+            showConfig(e);
         });
         map.on(L.Draw.Event.EDITED, function (e) {
             console.log('Polygon was edited!');
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('.sidenav');
-            var instances = M.Sidenav.init(elems, {
+            // 初始化图标
+            initIcon();
+            //初始化Materialize组件
+            initMaterialize();
+        });
+
+        function initIcon() {
+
+            var imageArr = [{
+                prop: "Air",
+                image: "Air.png"
+            }, {
+                prop: "Airport",
+                image: "Airport.png"
+            }, {
+                prop: "Fire",
+                image: "Fire.png"
+            }, {
+                prop: "FireStation",
+                image: "Fire_Station.png"
+            }, {
+                prop: "Gas",
+                image: "Gas.png"
+            }, {
+                prop: "Water",
+                image: "Water.png"
+            }]
+            imageArr.forEach(function (o) {
+                rbiIcon[o.prop] = L.icon({
+                    iconUrl: './css/images/icon/' + o.image,
+                    iconSize: [35, 35],
+                    iconAnchor: [12, 35],
+                    popupAnchor: [0, -35]
+                });
+            })
+            // rbiIcon.airport = L.icon({
+            //     iconUrl: './css/images/icon/icons8_Airport_35px.png',
+            //     iconSize: [35, 35],
+            //     iconAnchor: [12, 35],
+            //     popupAnchor: [0, -35]
+            // });
+
+            // rbiIcon.loading = L.icon({
+            //     iconUrl: './css/images/spinner.gif',
+            //     iconSize: [25, 25],
+            //     iconAnchor: [12, 25],
+            //     popupAnchor: [0, -25]
+            // })
+        }
+
+        function initMaterialize() {
+            // 侧边栏
+            M.Sidenav.init(document.querySelectorAll('.sidenav'), {
                 edge: "right"
             });
+            var slideElem = document.getElementById("slide-out");
+            sideNav = M.Sidenav.getInstance(slideElem);
+
+            // 折叠面板
             M.Collapsible.init(document.querySelectorAll('.collapsible'), {
                 accordion: false
             });
 
-            initIcon();
-        });
-
-        function initIcon() {
-            // var myIcon = L.icon({
-            //     iconUrl: './css/images/marker-icon.png',
-            //     iconSize: [25, 41],
-            //     iconAnchor: [12, 41],
-            //     popupAnchor: [0, -41],
-            //     shadowUrl: './css/images/marker-shadow.png',
-            //     shadowSize: [35, 41],
-            //     shadowAnchor: [10, 41]
-            // });
-            rbiIcon.airport = L.icon({
-                iconUrl: './css/images/icon/icons8_Airport_35px.png',
-                iconSize: [35, 35],
-                iconAnchor: [12, 35],
-                popupAnchor: [0, -35]
-            });
-
-            rbiIcon.loading = L.icon({
-                iconUrl: './css/images/spinner.gif',
-                iconSize: [25, 25],
-                iconAnchor: [12, 25],
-                popupAnchor: [0, -25]
-            })
+            // 下拉框
+            M.FormSelect.init(document.querySelectorAll('select'), {});
         }
 
-        function showSideConfig(e) {
+        function showConfig(e) {
             var layer = e.layer;
             let properties = layer.feature.properties;
 
             document.getElementById("deviceId").value = layer._leaflet_id;
 
-            var elem = document.getElementById("slide-out");
-            var instance = M.Sidenav.getInstance(elem);
-            instance.open();
+            sideNav.open();
         }
 
         function save() {
             let layerId = document.getElementById("deviceId").value;
             let layer = drawnItems.getLayer(layerId);
-            if (layer.feature.geometry.type !== "Point") {
+
+            //设置图层样式
+            if (layer["setStyle"]) {
                 layer.setStyle({
                     "color": document.querySelector("input[name=borderColor]").value,
                     "weight": document.querySelector("input[name=borderWeight]").value,
@@ -231,14 +289,14 @@
                     "fillColor": document.querySelector("input[name=fillColor]").value,
                     "fillOpacity": document.querySelector("input[name=fillOpacity]").value
                 });
-            } else {
-                // console.log("保存成功！");
-                layer.setIcon(rbiIcon.airport);
+            }
+            if (layer["setIcon"]) {
+                var icon = document.querySelector("select[name=defaultIcon]").value;
+                layer.setIcon(rbiIcon[icon]);
             }
 
-            var elem = document.getElementById("slide-out");
-            var instance = M.Sidenav.getInstance(elem);
-            instance.close();
+            // 关闭侧边栏
+            sideNav.close();
         }
     </script>
 </body>
