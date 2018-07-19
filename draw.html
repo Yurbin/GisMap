@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>鼠标绘制工具</title>
+    <link rel="stylesheet" href="./css/leaflet.css">
+    <link rel="stylesheet" href="./css/leaflet.draw.css">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/materialize/1.0.0-rc.1/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div id="slide-out" class="sidenav">
+        <ul class="collapsible">
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">place</i>属性配置</div>
+                <div class="collapsible-body">
+                    <input id="deviceId" type="text" hidden>
+                    <table class="bordered striped">
+                        <tbody>
+                            <tr class="style-row">
+                                <th>设备名称：</th>
+                                <td>
+                                    <input name="deviceName" type="text" value="">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>区域名称：</th>
+                                <td>
+                                    <input name="areaName" type="text" value="">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>是否有用：</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" />
+                                        <span>&nbsp;</span>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框颜色：</th>
+                                <td>
+                                    <input name="borderColor" type="color" value="#555555">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框宽度：</th>
+                                <td>
+                                    <input name="borderWeight" type="number" min="0" step="0.1" value="2">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框透明度：</th>
+                                <td>
+                                    <input name="borderOpacity" type="number" min="0" max="1" step="0.1" value="1">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充颜色：</th>
+                                <td>
+                                    <input name="fillColor" type="color" value="#80ff00">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充透明度：</th>
+                                <td>
+                                    <input name="fillOpacity" type="number" min="0" max="1" step="0.1" value="0.3">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="waves-effect waves-light btn" onclick="javascript:save();">
+                        <i class="material-icons left">cloud</i>保存</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+
+    <script src="./js/leaflet-src.js"></script>
+    <!-- 地图标注 -->
+    <script src="./js/leaflet.draw-src.js"></script>
+    <!-- 数据 -->
+    <script src="./js/geojson.js"></script>
+    <!-- materialize -->
+    <script src="https://cdn.bootcss.com/materialize/1.0.0-rc.1/js/materialize.min.js"></script>
+    <script>
+        var baseUrl = "http://localhost:9001/{id}/{z}/{x}/{y}.png";
+        var baiduTile = new L.TileLayer(baseUrl, {
+            id: '788865972'
+        });
+        var rbiIcon = {};
+
+
+        // 初始化地图
+        var map = L.map('map', {
+            attributionControl: false,
+            center: [24.520868, 118.188236],
+            doubleClickZoom: false, //禁用双击放大
+            editable: true, //启动编辑
+            zoom: 16,
+            maxZoom: 18,
+            layers: [baiduTile]
+        });
+        map.zoomControl.setPosition("bottomright")
+
+        // 加载数据
+        let i = 1;
+        var drawnItems =
+            L.featureGroup()
+            .on('click', showSideConfig)
+            .addTo(map);
+        var geoJsonLayer = L.geoJson(geoJsonData, {
+            onEachFeature: function (feature, layer) {
+                layer.addTo(drawnItems);
+
+                // layer._leaflet_id = feature.properties.id;
+                i += 1;
+            },
+            style: function (feature) {
+                return feature.properties;
+            }
+        });
+
+        // 添加绘图toolbar
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                //禁用圆形标记
+                circlemarker: false
+            }
+        }));
+
+        var rbiControl = L.Control.extend({
+            options: {
+                position: 'topleft'
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-rbi leaflet-bar leaflet-control');
+                var saveEle = L.DomUtil.create('a', 'leaflet-rbi-save');
+                saveEle.title = "保存数据至数据库";
+                saveEle.href = "javascript:void(0)";
+                saveEle.onclick = function () {
+                    alert("保存成功！");
+                    console.log(drawnItems.toGeoJSON());
+                }
+                container.appendChild(saveEle);
+                saveEle
+                return container;
+            }
+        });
+        map.addControl(new rbiControl());
+
+        // 事件响应
+        map.on(L.Draw.Event.CREATED, function (e) {
+            var layer = e.layer;
+            layer.addTo(drawnItems);
+        });
+        map.on(L.Draw.Event.EDITED, function (e) {
+            console.log('Polygon was edited!');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems, {
+                edge: "right"
+            });
+            M.Collapsible.init(document.querySelectorAll('.collapsible'), {
+                accordion: false
+            });
+
+            initIcon();
+        });
+
+        function initIcon() {
+            // var myIcon = L.icon({
+            //     iconUrl: './css/images/marker-icon.png',
+            //     iconSize: [25, 41],
+            //     iconAnchor: [12, 41],
+            //     popupAnchor: [0, -41],
+            //     shadowUrl: './css/images/marker-shadow.png',
+            //     shadowSize: [35, 41],
+            //     shadowAnchor: [10, 41]
+            // });
+            rbiIcon.airport = L.icon({
+                iconUrl: './css/images/icon/icons8_Airport_35px.png',
+                iconSize: [35, 35],
+                iconAnchor: [12, 35],
+                popupAnchor: [0, -35]
+            });
+
+            rbiIcon.loading = L.icon({
+                iconUrl: './css/images/spinner.gif',
+                iconSize: [25, 25],
+                iconAnchor: [12, 25],
+                popupAnchor: [0, -25]
+            })
+        }
+
+        function showSideConfig(e) {
+            var layer = e.layer;
+            let properties = layer.feature.properties;
+
+            document.getElementById("deviceId").value = layer._leaflet_id;
+
+            var elem = document.getElementById("slide-out");
+            var instance = M.Sidenav.getInstance(elem);
+            instance.open();
+        }
+
+        function save() {
+            let layerId = document.getElementById("deviceId").value;
+            let layer = drawnItems.getLayer(layerId);
+            if (layer.feature.geometry.type !== "Point") {
+                layer.setStyle({
+                    "color": document.querySelector("input[name=borderColor]").value,
+                    "weight": document.querySelector("input[name=borderWeight]").value,
+                    "opacity": document.querySelector("input[name=borderOpacity]").value,
+                    "fillColor": document.querySelector("input[name=fillColor]").value,
+                    "fillOpacity": document.querySelector("input[name=fillOpacity]").value
+                });
+            } else {
+                // console.log("保存成功！");
+                layer.setIcon(rbiIcon.airport);
+            }
+
+            var elem = document.getElementById("slide-out");
+            var instance = M.Sidenav.getInstance(elem);
+            instance.close();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#map {
+  /* position: absolute !important; */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+}
+
+.leaflet-bar a.leaflet-draw-toolbar-button-enabled {
+  background-color: #8fcef3;
+}
+
+.leaflet-div-icon {
+  border-radius: 50%;
+}
+
+/* .leaflet-control.leaflet-rbi{
+  background-color: #fff;
+  background-image: url("./images/ok.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.leaflet-control.leaflet-rbi:hover{
+  background-color: #f4f4f4;
+} */
+
+.leaflet-control.leaflet-rbi a.leaflet-rbi-save {
+  background-color: #fff;
+  background-image: url("./images/ok.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  /* width: 30px;
+  height: 30px;
+  cursor: pointer; */
+}
+
+.leaflet-control.leaflet-rbi a:hover {
+  background-color: #f4f4f4;
+}
+
+.leaflet-tooltip {
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+  line-height: 2em;
+  padding: 8px 10px;
+}
+
+.leaflet-tooltip-rbi {
+  /* padding:5px 10px; */
+  line-height: 2em;
+  /* border-radius: 10px; */
+  /* border:solid 1px rgba(0,0,0,0.13); */
+}
+
+/* table */
+
+.sidenav {
+  width: 400px;
+}
+
+.sidenav .collapsible-body {
+  padding: 10px;
+}
+
+#slide-out table {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+#slide-out table tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+#slide-out table tr td,
+#slide-out table tr th {
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0 5px;
+}
+
+input[type=text]:not(.browser-default),
+input[type=number]:not(.browser-default) {
+  border-bottom-width: 0;
+  height: 1.5em;
+}
+
+input[type=text]:not(.browser-default):focus:not([readonly]),
+input[type=number]:not(.browser-default):focus:not([readonly]) {
+  /* border-bottom: 0 solid rgba(0, 0, 0, 0.12); */
+}
