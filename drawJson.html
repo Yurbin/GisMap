@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>鼠标绘制工具</title>
+    <link rel="stylesheet" href="./css/leaflet.css">
+    <link rel="stylesheet" href="./css/leaflet.draw.css">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/materialize/1.0.0-rc.1/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div id="slide-out" class="sidenav">
+        <ul class="collapsible">
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">devices</i>设备信息</div>
+                <div class="collapsible-body">
+                    <input id="layerId" type="text" hidden>
+                    <table class="bordered striped">
+                        <tbody>
+                            <tr class="style-row">
+                                <th>设备ID：</th>
+                                <td>
+                                    <input name="kId" type="number" min="1" step="1">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>设备名称：</th>
+                                <td>
+                                    <input name="prjName" type="text" value="">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>区域名称：</th>
+                                <td>
+                                    <input name="areaName" type="text" value="">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>是否有用：</th>
+                                <td>
+                                    <label>
+                                        <input name="inUse" type="checkbox" checked />
+                                        <span>&nbsp;</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">style</i>设备样式</div>
+                <div class="collapsible-body">
+                    <table class="bordered striped">
+                        <tbody>
+                            <tr class="style-row">
+                                <th>边框颜色：</th>
+                                <td>
+                                    <input name="borderColor" type="color" value="#555555">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框宽度：</th>
+                                <td>
+                                    <input name="borderWeight" type="number" min="0" step="0.1" value="2">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框透明度：</th>
+                                <td>
+                                    <input name="borderOpacity" type="number" min="0" max="1" step="0.1" value="1">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充颜色：</th>
+                                <td>
+                                    <input name="fillColor" type="color" value="#80ff00">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充透明度：</th>
+                                <td>
+                                    <input name="fillOpacity" type="number" min="0" max="1" step="0.1" value="0.3">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>常态图标：</th>
+                                <td>
+                                    <select name="defaultIcon">
+                                        <option value="Default" data-icon="./css/images/marker-icon.png" selected>Default</option>
+                                        <option value="Air" data-icon="./css/images/icon/Air.png">Air</option>
+                                        <option value="Airport" data-icon="./css/images/icon/Airport.png">Airport</option>
+                                        <option value="Fire" data-icon="./css/images/icon/Fire.png">Fire</option>
+                                        <option value="Gas" data-icon="./css/images/icon/Gas.png">Gas</option>
+                                        <option value="Water" data-icon="./css/images/icon/Water.png">Water</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>报警图标：</th>
+                                <td>
+                                    <select name="warmIcon">
+                                        <option value="" disabled selected>请选择</option>
+                                        <option value="Air" data-icon="./css/images/icon/Air.png">Air</option>
+                                        <option value="Airport" data-icon="./css/images/icon/Airport.png">Airport</option>
+                                        <option value="FireStation" data-icon="./css/images/icon/Fire_Station.png">FireStation</option>
+                                        <option value="Gas" data-icon="./css/images/icon/Gas.png">Gas</option>
+                                        <option value="Water" data-icon="./css/images/icon/Water.png">Water</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="waves-effect waves-light btn" onclick="javascript:save();">
+                        <i class="material-icons left">cloud</i>保存</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <script src="./js/leaflet-src.js"></script>
+    <!-- 地图标注 -->
+    <script src="./js/leaflet.draw-src.js"></script>
+    <!-- 数据 -->
+    <script src="./js/geojson.js"></script>
+    <script src="./js/customData.js"></script>
+    <!-- materialize -->
+    <script src="https://cdn.bootcss.com/materialize/1.0.0-rc.1/js/materialize.min.js"></script>
+    <script>
+        var baseUrl = "http://localhost:9002/GisMap/{id}/{z}/{x}/{y}.png";
+        var baiduTile = new L.TileLayer(baseUrl, {
+            id: '788865972'
+        });
+        var rbiIcon = {},
+            sideNav,
+            defaultProj = {
+                ID: "",
+                KID: "",
+                PrjName: "",
+                AreaType: "",
+                AreaName: "",
+                InUse: true,
+                Points: "",
+                GIFFile: "",
+                IconFile: "Default",
+                StrokeWeight: "",
+                StrokeColor: "",
+                StrokeOpacity: "",
+                FillOpacity: "",
+                FillColor: "",
+            };
+
+        var layerIdElem = document.getElementById("layerId"),
+            kIdElem = document.querySelector("input[name=kId]"),
+            prjNameElem = document.querySelector("input[name=prjName]"),
+            areaNameElem = document.querySelector("input[name=areaName]"),
+            inUseElem = document.querySelector("input[name=inUse]"),
+            borderColorElem = document.querySelector("input[name=borderColor]"),
+            borderWeightElem = document.querySelector("input[name=borderWeight]"),
+            borderOpacityElem = document.querySelector("input[name=borderOpacity]"),
+            fillColorElem = document.querySelector("input[name=fillColor]"),
+            fillOpacityElem = document.querySelector("input[name=fillOpacity]"),
+            defaultIconElem = document.querySelector("select[name=defaultIcon]"),
+            warmIconElem = document.querySelector("select[name=warmIcon]");
+
+
+        // 初始化地图
+        var map = L.map('map', {
+            attributionControl: false,
+            center: [24.520868, 118.188236],
+            doubleClickZoom: false, //禁用双击放大
+            editable: true, //启动编辑
+            zoom: 16,
+            maxZoom: 18,
+            layers: [baiduTile]
+        });
+        map.zoomControl.setPosition("bottomright")
+
+        // 加载数据
+        var drawnItems = L.featureGroup()
+            .on('click', showConfig)
+            .addTo(map);
+
+        // 添加绘图toolbar
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                //禁用圆形标记
+                circlemarker: false,
+                circle: false
+            }
+        }));
+
+        // var rbiControl = L.Control.extend({
+        //     options: {
+        //         position: 'topleft'
+        //     },
+        //     onAdd: function (map) {
+        //         var container = L.DomUtil.create('div', 'leaflet-rbi leaflet-bar leaflet-control');
+        //         var saveEle = L.DomUtil.create('a', 'leaflet-rbi-save');
+        //         saveEle.title = "保存数据至数据库";
+        //         saveEle.href = "javascript:void(0)";
+        //         saveEle.onclick = function () {
+        //             alert("保存成功！");
+        //             console.log(drawnItems.toGeoJSON());
+        //         }
+        //         container.appendChild(saveEle);
+        //         return container;
+        //     }
+        // });
+        // map.addControl(new rbiControl());
+
+        // 事件响应
+        map.on(L.Draw.Event.CREATED, function (e) {
+            var layer = e.layer;
+            layer.proj = L.extend({}, defaultProj, {
+                ID: guid().toUpperCase(),
+                AreaType: e.layerType,
+                StrokeWeight: layer.options.weight,
+                StrokeColor: layer.options.color,
+                StrokeOpacity: layer.options.opacity,
+                FillOpacity: layer.options.fillOpacity,
+                FillColor: layer.options.fillColor
+            });
+            layer.addTo(drawnItems);
+
+            // 默认展开配置项
+            showConfig(e);
+            // addToJson(e);
+        }).on(L.Draw.Event.EDITED, function (e) {
+            console.log('Polygon was edited!');
+            console.log(e);
+        }).on(L.Draw.Event.DELETED, function (e) {
+            console.log('Polygon was DELETED!');
+            console.log(e);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化图标
+            initIcon();
+            //初始化Materialize组件
+            initMaterialize();
+            // 初始化数据
+            initData();
+        });
+
+        function initIcon() {
+            var imageArr = [{
+                prop: "Air",
+                image: "Air.png"
+            }, {
+                prop: "Airport",
+                image: "Airport.png"
+            }, {
+                prop: "Fire",
+                image: "Fire.png"
+            }, {
+                prop: "FireStation",
+                image: "Fire_Station.png"
+            }, {
+                prop: "Gas",
+                image: "Gas.png"
+            }, {
+                prop: "Water",
+                image: "Water.png"
+            }]
+            rbiIcon["Default"] = L.icon({
+                "iconUrl": "./css/images/marker-icon.png",
+                "iconRetinaUrl": "./css/images/marker-icon-2x.png",
+                "shadowUrl": "./css/images/marker-shadow.png",
+                "iconSize": [25, 41],
+                "iconAnchor": [12, 41],
+                "popupAnchor": [1, -34],
+                "tooltipAnchor": [16, -28],
+                "shadowSize": [41, 41]
+            });
+
+            imageArr.forEach(function (o) {
+                rbiIcon[o.prop] = L.icon({
+                    iconUrl: './css/images/icon/' + o.image,
+                    iconSize: [35, 35],
+                    iconAnchor: [12, 35],
+                    popupAnchor: [0, -35]
+                });
+            });
+        }
+
+        function initMaterialize() {
+            // 侧边栏
+            M.Sidenav.init(document.querySelectorAll('.sidenav'), {
+                edge: "right"
+            });
+            var slideElem = document.getElementById("slide-out");
+            sideNav = M.Sidenav.getInstance(slideElem);
+
+            // 折叠面板
+            M.Collapsible.init(document.querySelectorAll('.collapsible'), {
+                accordion: false
+            });
+
+            // 下拉框
+            M.FormSelect.init(document.querySelectorAll('select'), {});
+        }
+
+        function initData() {
+            jsonData.forEach(function (item) {
+                var latlngs = [];
+                switch (item.type) {
+                    case "circle":
+                    case "marker":
+                        latlngs = item.latlng.split(",");
+                        break;
+                    default:
+                        latlngs = item.latlng.split(";").map(function (o) {
+                            return o.split(",")
+                        })
+                        break;
+                }
+                var layer = L[item.type](latlngs, item).addTo(drawnItems);
+                if (item.type === "marker" && item.defaultIcon) {
+                    layer.setIcon(rbiIcon[item.defaultIcon]);
+                }
+            })
+        }
+
+        function addToJson(e) {
+            var layer = e.layer;
+            var geo = layer.toGeoJSON(),
+                latlng = "";
+
+            var data = {
+                "id": jsonData.length,
+                "type": e.layerType,
+                "latlng": "",
+                "options": layer.options
+            };
+
+            switch (data.type) {
+                case "circle":
+                    data.options.radius = layer.getRadius();
+                case "marker":
+                    latlng = geo.geometry.coordinates[1] + "," + geo.geometry.coordinates[0];
+                    break;
+                case "polyline":
+                    latlng = geo.geometry.coordinates.map(function (o) {
+                        return o[1] + "," + o[0];
+                    }).join(";");
+                    break;
+                default:
+                    latlng = geo.geometry.coordinates[0].map(function (o) {
+                        return o[1] + "," + o[0];
+                    }).join(";")
+                    break;
+            }
+            data.latlng = latlng;
+            jsonData.push(data);
+        };
+
+        function showConfig(e) {
+            var layer = e.layer;
+            var proj = layer.proj;
+            layerIdElem.value = layer._leaflet_id;
+            kIdElem.value = proj.KID;
+            prjNameElem.value = proj.PrjName;
+            areaNameElem.value = proj.AreaName;
+            inUseElem.checked = proj.InUse;
+            borderWeightElem.value = proj.StrokeWeight;
+            borderColorElem.value = proj.StrokeColor;
+            borderOpacityElem.value = proj.StrokeOpacity;
+            fillOpacityElem.value = proj.FillOpacity;
+            fillColorElem.value = proj.FillColor;
+            warmIconElem.value = proj.GIFFile;
+            defaultIconElem.value = proj.IconFile;
+
+            sideNav.open();
+        }
+
+        function save() {
+            //设置图层样式
+            var layer = drawnItems.getLayer(layerIdElem.value);
+            if (layer["setStyle"]) {
+                layer.setStyle({
+                    "color": borderColorElem.value,
+                    "weight": borderWeightElem.value,
+                    "opacity": borderOpacityElem.value,
+                    "fillColor": fillColorElem.value,
+                    "fillOpacity": fillOpacityElem.value
+                });
+            }
+            if (layer["setIcon"]) {
+                layer.setIcon(rbiIcon[defaultIconElem.value]);
+            }
+
+            //更新数据
+            L.extend(layer.proj, {
+                KID: kIdElem.value,
+                PrjName: prjNameElem.value,
+                AreaName: areaNameElem.value,
+                InUse: inUseElem.checked,
+                StrokeWeight: borderWeightElem.value,
+                StrokeColor: borderColorElem.value,
+                StrokeOpacity: borderOpacityElem.value,
+                FillOpacity: fillOpacityElem.value,
+                FillColor: fillColorElem.value,
+                GIFFile: warmIconElem.value,
+                IconFile: defaultIconElem.value,
+            });
+
+            // 关闭侧边栏
+            sideNav.close();
+        }
+
+        // 后台操作
+        var projUri = '/api/Proj/';
+
+        function guid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+            return s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4();
+        }
+
+        function getProjModel(layer) {
+
+            var proj = {
+                KID: layer.keyId || guid().toUpperCase(),
+                PrjName: self.newBook.Genre(),
+                Price: self.newBook.Price(),
+                Title: self.newBook.Title(),
+                Year: self.newBook.Year()
+            };
+            return proj;
+        }
+
+        function addProj(layer) {
+            layer.keyId = guid().toUpperCase();
+
+        }
+    </script>
+</body>
+
+</html>

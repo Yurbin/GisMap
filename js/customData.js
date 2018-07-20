@@ -1,0 +1,59 @@
+var jsonData = [{
+    "id": 0,
+    "type": "polyline",
+    "latlng": "24.528072,118.174782;24.527642,118.180661",
+    "stroke": true,
+    "color": "#3388ff",
+    "weight": 4,
+    "opacity": 0.5,
+    "fill": false,
+    "clickable": true
+}, {
+    "id": 1,
+    "type": "polygon",
+    "latlng": "24.526627,118.172636;24.526569,118.178515;24.52243,118.177528;24.523504,118.171778;24.525378,118.16916;24.526627,118.172636",
+    "stroke": true,
+    "color": "#3388ff",
+    "weight": 4,
+    "opacity": 0.5,
+    "fill": true,
+    "fillColor": null,
+    "fillOpacity": 0.2,
+    "clickable": true
+}, {
+    "id": 2,
+    "type": "rectangle",
+    "latlng": "24.516983,118.16916;24.521356,118.16916;24.521356,118.177013;24.516983,118.177013;24.516983,118.16916",
+    "stroke": true,
+    "color": "#3388ff",
+    "weight": 4,
+    "opacity": 0.5,
+    "fill": true,
+    "fillColor": null,
+    "fillOpacity": 0.2,
+    "showArea": true,
+    "clickable": true
+}, {
+    "id": 3,
+    "type": "circle",
+    "latlng": "24.521376,118.182957",
+    "stroke": true,
+    "color": "#3388ff",
+    "weight": 4,
+    "opacity": 0.5,
+    "fill": true,
+    "fillColor": null,
+    "fillOpacity": 0.2,
+    "clickable": true,
+    "radius": 356.1706430005905
+}, {
+    "id": 4,
+    "type": "marker",
+    "latlng": "24.521454,118.182979",
+    "defaultIcon": ""
+}, {
+    "id": 5,
+    "type": "marker",
+    "latlng": "24.526354,118.180983",
+    "defaultIcon": "Fire"
+}];
