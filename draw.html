@@ -21,15 +21,21 @@
         <ul class="collapsible">
             <li class="active">
                 <div class="collapsible-header">
-                    <i class="material-icons">place</i>属性配置</div>
+                    <i class="material-icons">devices</i>设备信息</div>
                 <div class="collapsible-body">
-                    <input id="deviceId" type="text" hidden>
+                    <input id="layerId" type="text" hidden>
                     <table class="bordered striped">
                         <tbody>
                             <tr class="style-row">
+                                <th>设备ID：</th>
+                                <td>
+                                    <input name="kId" type="number" min="1" step="1">
+                                </td>
+                            </tr>
+                            <tr class="style-row">
                                 <th>设备名称：</th>
                                 <td>
-                                    <input name="deviceName" type="text" value="">
+                                    <input name="prjName" type="text" value="">
                                 </td>
                             </tr>
                             <tr class="style-row">
@@ -42,11 +48,21 @@
                                 <th>是否有用：</th>
                                 <td>
                                     <label>
-                                        <input type="checkbox" />
+                                        <input name="inUse" type="checkbox" checked />
                                         <span>&nbsp;</span>
                                     </label>
                                 </td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">style</i>设备样式</div>
+                <div class="collapsible-body">
+                    <table class="bordered striped">
+                        <tbody>
                             <tr class="style-row">
                                 <th>边框颜色：</th>
                                 <td>
@@ -81,8 +97,7 @@
                                 <th>常态图标：</th>
                                 <td>
                                     <select name="defaultIcon">
-                                        <option value="" disabled selected>请选择</option>
-                                        <option value="Default" data-icon="./css/images/marker-icon.png">Default</option>
+                                        <option value="Default" data-icon="./css/images/marker-icon.png" selected>Default</option>
                                         <option value="Air" data-icon="./css/images/icon/Air.png">Air</option>
                                         <option value="Airport" data-icon="./css/images/icon/Airport.png">Airport</option>
                                         <option value="Fire" data-icon="./css/images/icon/Fire.png">Fire</option>
@@ -116,17 +131,46 @@
     <script src="./js/leaflet-src.js"></script>
     <!-- 地图标注 -->
     <script src="./js/leaflet.draw-src.js"></script>
-    <!-- 数据 -->
-    <script src="./js/geojson.js"></script>
     <!-- materialize -->
     <script src="https://cdn.bootcss.com/materialize/1.0.0-rc.1/js/materialize.min.js"></script>
+    <!-- jquery -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        var baseUrl = "http://localhost:9001/{id}/{z}/{x}/{y}.png";
+        var baseUrl = "http://localhost:9002/GisMap/{id}/{z}/{x}/{y}.png";
         var baiduTile = new L.TileLayer(baseUrl, {
             id: '788865972'
         });
         var rbiIcon = {},
-            sideNav;
+            sideNav,
+            defaultProj = {
+                ID: "",
+                KID: "",
+                PrjName: "",
+                AreaType: "",
+                AreaName: "",
+                InUse: true,
+                Points: "",
+                GIFFile: "",
+                IconFile: "Default",
+                StrokeWeight: "",
+                StrokeColor: "",
+                StrokeOpacity: "",
+                FillOpacity: "",
+                FillColor: "",
+            };
+
+        var layerIdElem = document.getElementById("layerId"),
+            kIdElem = document.querySelector("input[name=kId]"),
+            prjNameElem = document.querySelector("input[name=prjName]"),
+            areaNameElem = document.querySelector("input[name=areaName]"),
+            inUseElem = document.querySelector("input[name=inUse]"),
+            borderColorElem = document.querySelector("input[name=borderColor]"),
+            borderWeightElem = document.querySelector("input[name=borderWeight]"),
+            borderOpacityElem = document.querySelector("input[name=borderOpacity]"),
+            fillColorElem = document.querySelector("input[name=fillColor]"),
+            fillOpacityElem = document.querySelector("input[name=fillOpacity]"),
+            defaultIconElem = document.querySelector("select[name=defaultIcon]"),
+            warmIconElem = document.querySelector("select[name=warmIcon]");
 
 
         // 初始化地图
@@ -142,18 +186,9 @@
         map.zoomControl.setPosition("bottomright")
 
         // 加载数据
-        var drawnItems =
-            L.featureGroup()
+        var drawnItems = L.featureGroup()
             .on('click', showConfig)
             .addTo(map);
-        var geoJsonLayer = L.geoJson(geoJsonData, {
-            onEachFeature: function (feature, layer) {
-                layer.addTo(drawnItems);
-            },
-            style: function (feature) {
-                return feature.properties;
-            }
-        });
 
         // 添加绘图toolbar
         map.addControl(new L.Control.Draw({
@@ -167,36 +202,42 @@
             }
         }));
 
-        var rbiControl = L.Control.extend({
-            options: {
-                position: 'topleft'
-            },
-            onAdd: function (map) {
-                var container = L.DomUtil.create('div', 'leaflet-rbi leaflet-bar leaflet-control');
-                var saveEle = L.DomUtil.create('a', 'leaflet-rbi-save');
-                saveEle.title = "保存数据至数据库";
-                saveEle.href = "javascript:void(0)";
-                saveEle.onclick = function () {
-                    alert("保存成功！");
-                    console.log(drawnItems.toGeoJSON());
-                }
-                container.appendChild(saveEle);
-                return container;
-            }
-        });
-        map.addControl(new rbiControl());
-
         // 事件响应
         map.on(L.Draw.Event.CREATED, function (e) {
             var layer = e.layer;
-            layer.feature = layer.toGeoJSON();
+            layer.proj = L.extend({}, defaultProj, {
+                ID: guid().toUpperCase(),
+                AreaType: e.layerType,
+                Points: latlngToPoints(layer),
+                StrokeWeight: layer.options.weight || "",
+                StrokeColor: layer.options.color || L.Polyline.prototype.options.color,
+                StrokeOpacity: layer.options.opacity || 1,
+                FillOpacity: layer.options.fillOpacity || 1,
+                FillColor: layer.options.fillColor || layer.options.color || L.Polyline.prototype.options
+                    .color
+            });
             layer.addTo(drawnItems);
+
+            addProj(layer);
+
 
             // 默认展开配置项
             showConfig(e);
-        });
-        map.on(L.Draw.Event.EDITED, function (e) {
-            console.log('Polygon was edited!');
+
+        }).on(L.Draw.Event.EDITED, function (e) {
+            // 获取当前编辑项
+            var editLayers = e.layers.getLayers();
+            editLayers.forEach(function (layer) {
+                layer.proj.Points = latlngToPoints(layer);
+                updateProj(layer);
+            });
+        }).on(L.Draw.Event.DELETED, function (e) {
+            // 获取当前删除项
+            var delLayers = e.layers.getLayers();
+            delLayers.forEach(function (layer) {
+                layer.proj.Points = latlngToPoints(layer);
+                deleteProj(layer);
+            });
         });
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -204,10 +245,11 @@
             initIcon();
             //初始化Materialize组件
             initMaterialize();
+            // 初始化数据
+            getProjs();
         });
 
         function initIcon() {
-
             var imageArr = [{
                 prop: "Air",
                 image: "Air.png"
@@ -227,6 +269,17 @@
                 prop: "Water",
                 image: "Water.png"
             }]
+            rbiIcon["Default"] = L.icon({
+                "iconUrl": "./css/images/marker-icon.png",
+                "iconRetinaUrl": "./css/images/marker-icon-2x.png",
+                "shadowUrl": "./css/images/marker-shadow.png",
+                "iconSize": [25, 41],
+                "iconAnchor": [12, 41],
+                "popupAnchor": [1, -34],
+                "tooltipAnchor": [16, -28],
+                "shadowSize": [41, 41]
+            });
+
             imageArr.forEach(function (o) {
                 rbiIcon[o.prop] = L.icon({
                     iconUrl: './css/images/icon/' + o.image,
@@ -234,20 +287,7 @@
                     iconAnchor: [12, 35],
                     popupAnchor: [0, -35]
                 });
-            })
-            // rbiIcon.airport = L.icon({
-            //     iconUrl: './css/images/icon/icons8_Airport_35px.png',
-            //     iconSize: [35, 35],
-            //     iconAnchor: [12, 35],
-            //     popupAnchor: [0, -35]
-            // });
-
-            // rbiIcon.loading = L.icon({
-            //     iconUrl: './css/images/spinner.gif',
-            //     iconSize: [25, 25],
-            //     iconAnchor: [12, 25],
-            //     popupAnchor: [0, -25]
-            // })
+            });
         }
 
         function initMaterialize() {
@@ -267,36 +307,146 @@
             M.FormSelect.init(document.querySelectorAll('select'), {});
         }
 
+        // 将经纬度坐标转换成字符串
+        function latlngToPoints(layer) {
+            var latlngs = [],
+                points = "";
+            if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+                latlngs = layer.getLatLngs()[0];
+                points = latlngs.map(function (o) {
+                    return o.lat + "," + o.lng;
+                }).join(";");
+            } else if (layer instanceof L.Polyline) {
+                latlngs = layer.getLatLngs();
+                points = latlngs.map(function (o) {
+                    return o.lat + "," + o.lng;
+                }).join(";");
+            } else if (layer instanceof L.Marker) {
+                latlngs = layer.getLatLng();
+                points = latlngs.lat + "," + latlngs.lng;
+            }
+            return points;
+        }
+
+        // 将字符串转换成经纬度坐标
+        function pointToLaglngs(data) {
+            var latlngs = [];
+            switch (data.AreaType) {
+                case "circle":
+                case "marker":
+                    latlngs = data.Points.split(",");
+                    break;
+                default:
+                    latlngs = data.Points.split(";").map(function (o) {
+                        return o.split(",")
+                    });
+                    break;
+            }
+            return latlngs;
+        }
+
         function showConfig(e) {
             var layer = e.layer;
-            let properties = layer.feature.properties;
-
-            document.getElementById("deviceId").value = layer._leaflet_id;
+            var proj = layer.proj;
+            layerIdElem.value = layer._leaflet_id;
+            kIdElem.value = proj.KID;
+            prjNameElem.value = proj.PrjName;
+            areaNameElem.value = proj.AreaName;
+            inUseElem.checked = proj.InUse;
+            borderWeightElem.value = proj.StrokeWeight;
+            borderColorElem.value = proj.StrokeColor;
+            borderOpacityElem.value = proj.StrokeOpacity;
+            fillOpacityElem.value = proj.FillOpacity;
+            fillColorElem.value = proj.FillColor;
+            warmIconElem.value = proj.GIFFile;
+            defaultIconElem.value = proj.IconFile;
 
             sideNav.open();
         }
 
         function save() {
-            let layerId = document.getElementById("deviceId").value;
-            let layer = drawnItems.getLayer(layerId);
-
             //设置图层样式
+            var layer = drawnItems.getLayer(layerIdElem.value);
             if (layer["setStyle"]) {
                 layer.setStyle({
-                    "color": document.querySelector("input[name=borderColor]").value,
-                    "weight": document.querySelector("input[name=borderWeight]").value,
-                    "opacity": document.querySelector("input[name=borderOpacity]").value,
-                    "fillColor": document.querySelector("input[name=fillColor]").value,
-                    "fillOpacity": document.querySelector("input[name=fillOpacity]").value
+                    "color": borderColorElem.value,
+                    "weight": borderWeightElem.value,
+                    "opacity": borderOpacityElem.value,
+                    "fillColor": fillColorElem.value,
+                    "fillOpacity": fillOpacityElem.value
                 });
             }
             if (layer["setIcon"]) {
-                var icon = document.querySelector("select[name=defaultIcon]").value;
-                layer.setIcon(rbiIcon[icon]);
+                layer.setIcon(rbiIcon[defaultIconElem.value]);
             }
+
+            //更新数据
+            L.extend(layer.proj, {
+                KID: kIdElem.value,
+                PrjName: prjNameElem.value,
+                AreaName: areaNameElem.value,
+                InUse: inUseElem.checked,
+                StrokeWeight: borderWeightElem.value,
+                StrokeColor: borderColorElem.value,
+                StrokeOpacity: borderOpacityElem.value,
+                FillOpacity: fillOpacityElem.value,
+                FillColor: fillColorElem.value,
+                GIFFile: warmIconElem.value,
+                IconFile: defaultIconElem.value,
+            });
+            updateProj(layer);
 
             // 关闭侧边栏
             sideNav.close();
+        }
+
+        // 后台操作
+        var projUri = 'http://localhost:52734/api/Proj/';
+
+        function guid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+            return s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4();
+        }
+
+        function ajaxHelper(uri, method, data) {
+            return $.ajax({
+                type: method,
+                url: uri,
+                dataType: 'json',
+                contentType: 'application/json',
+                data: data ? JSON.stringify(data) : null
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error(errorThrown);
+            });
+        }
+
+        function getProjs() {
+            ajaxHelper(projUri, 'GET').done(function (data) {
+                data.forEach(function (item) {
+                    var latlngs = pointToLaglngs(item);
+                    var layer = L[item.AreaType](latlngs, item).addTo(drawnItems);
+                    layer.proj = item;
+                    if (item.AreaType === "marker" && item.IconFile) {
+                        layer.setIcon(rbiIcon[item.IconFile]);
+                    }
+                });
+            });
+        }
+
+        function addProj(layer) {
+            ajaxHelper(projUri, 'POST', layer.proj);
+        }
+
+        function updateProj(layer) {
+            ajaxHelper(projUri + layer.proj.ID, 'PUT', layer.proj);
+        }
+
+        function deleteProj(layer) {
+            ajaxHelper(projUri + layer.proj.ID, 'DELETE');
         }
     </script>
 </body>
