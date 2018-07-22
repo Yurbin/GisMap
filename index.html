@@ -2,184 +2,178 @@
 <html>
 
 <head>
-  <title>Quick Start - Leaflet</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-  <link rel="stylesheet" href="./css/leaflet.css">
-  <link rel="stylesheet" href="./css/MarkerCluster.css">
-  <link rel="stylesheet" href="./css/MarkerCluster.Default.css">
-  <link rel="stylesheet" href="./css/leaflet.contextmenu.min.css">
-  <link rel="stylesheet" href="./css/style.css">
+	<title>Quick Start - Leaflet</title>
+	<meta charset="utf-8" />
+	<meta name="viewport"
+	      content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon"
+	      type="image/x-icon"
+	      href="docs/images/favicon.ico" />
+	<link rel="stylesheet"
+	      href="./css/leaflet.css">
+	<link rel="stylesheet"
+	      href="./css/MarkerCluster.css">
+	<link rel="stylesheet"
+	      href="./css/MarkerCluster.Default.css">
+	<link rel="stylesheet"
+	      href="./css/leaflet.contextmenu.min.css">
+	<link rel="stylesheet"
+	      href="./css/style.css">
 </head>
 
 <body>
-  <div id="map"></div>
+	<div id="map"></div>
 
-  <script src="./js/leaflet.js"></script>
-  <!-- 标记聚合 -->
-  <script src="./js/leaflet.markercluster.js"></script>
-  <!-- 标记聚合，勾选改变聚合数量 -->
-  <script src="./js/leaflet.markercluster.layersupport.js"></script>
-  <!-- 右键菜单 -->
-  <script src="./js/leaflet.contextmenu.min.js"></script>
-  <!-- 数据 -->
-  <script src="./js/geojson.js"></script>
-  <script>
-    var baseUrl = "http://localhost:9001/{id}/{z}/{x}/{y}.png";
-    var baiduTile = new L.TileLayer(baseUrl, {
-      id: '788865972'
-    });
-    var googleTile = new L.TileLayer(baseUrl, {
-      id: '788865973'
-    });
+	<script src="./js/leaflet.js"></script>
+	<!-- 标记聚合 -->
+	<script src="./js/leaflet.markercluster.js"></script>
+	<!-- 标记聚合，勾选改变聚合数量 -->
+	<script src="./js/leaflet.markercluster.layersupport.js"></script>
+	<!-- 右键菜单 -->
+	<script src="./js/leaflet.contextmenu.min.js"></script>
+	<!-- jquery -->
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+	<script src="./js/leaflet.helper.js"></script>
+	<script>
+		var baseUrl = "http://localhost:52734/",
+			tileUri = baseUrl + "/GisMap/{id}/{z}/{x}/{y}.png",
+			mapApi = baseUrl + "/api/UserProject/";
+		var baiduTile = new L.TileLayer(tileUri, { id: '788865972' });
+		var googleTile = new L.TileLayer(tileUri, { id: '788865972' });
 
-    var sensorData = [{
-      id: 10,
-      data_I: {
-        IA: 10,
-        IB: 5.6,
-        IC: 21.1
-      },
-      data_U: {
-        UA: 250,
-        UB: 220,
-        UC: 320
-      }
-    }];
+		var rbiIcon = {};
 
-    function showCoordinates(e) {
-      L.popup()
-        .setLatLng(e.latlng)
-        .setContent("当前点击坐标：" + e.latlng.toString())
-        .openOn(map);
-    }
+		// 初始化地图
+		var map = L.map('map', {
+			attributionControl: false,
+			center: [24.520868, 118.188236],
+			contextmenu: true,
+			contextmenuWidth: 140,
+			contextmenuItems: [{
+				text: '显示当前坐标',
+				icon: 'css/images/Location.png',
+				callback: showCoordinates
+			}, {
+				text: '设置地图中心',
+				icon: 'css/images/Center.png',
+				callback: setMapCenter
+			}],
+			doubleClickZoom: false, //禁用双击放大
+			editable: true, //启动编辑
+			zoom: 16,
+			maxZoom: 18,
+			layers: [baiduTile]
+		});
+		map.zoomControl.setPosition("bottomright")
 
-    function setMapCenter(e) {
-      map.panTo(e.latlng);
-    }
+		// 显示当前坐标
+		function showCoordinates(e) {
+			L.popup()
+				.setLatLng(e.latlng)
+				.setContent("当前点击坐标：" + e.latlng.toString())
+				.openOn(map);
+		}
 
-    function openKsPage(e) {
-      window.external.ClickObject("弹出框");
-    }
+		// 设置地图中心
+		function setMapCenter(e) {
+			map.panTo(e.latlng);
+		}
 
-    var map = L.map('map', {
-      attributionControl: false,
-      center: [24.520868, 118.188236],
-      contextmenu: true,
-      contextmenuWidth: 140,
-      contextmenuItems: [{
-        text: '显示当前坐标',
-        icon: 'css/images/Location.png',
-        callback: showCoordinates
-      }, {
-        text: '设置地图中心',
-        icon: 'css/images/Center.png',
-        callback: setMapCenter
-      }],
-      doubleClickZoom: false, //禁用双击放大
-      editable: true, //启动编辑
-      zoom: 16,
-      maxZoom: 18,
-      layers: [baiduTile]
-    });
-    map.zoomControl.setPosition("bottomright")
+		// 打开组态页面
+		function openKsPage(e) {
+			window.external.ClickObject("弹出框");
+		}
 
-    var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport(),
-      groupFJ = L.layerGroup(),
-      groupDJ = L.layerGroup(),
-      groupOther = L.layerGroup();
-    var geoJsonLayer = L.geoJson(geoJsonData, {
-      onEachFeature: function (feature, layer) {
-        layer
-          // .bindPopup(feature.properties.deviceName || "Hello World")
-          // .bindPopup("loading...")
-          .bindTooltip("loading...", {
-            direction: "top",
-            opacity: 1
-          })
-          .bindContextMenu({
-            contextmenu: true,
-            contextmenuWidth: 140,
-            contextmenuItems: [{
-              text: '打开组态页面',
-              icon: 'css/images/Advertisement.png',
-              callback: openKsPage
-            }]
-          }).on("click", function (e) {
-            // openKsPage();
-          }).on("tooltipopen", function (e) {
-            var tooltip = e.target.getTooltip();
-            tooltip.setContent("loading...");
-            tooltip.update();
-            setTimeout(function () {
-              tooltip.setContent(
-                "<div class='leaflet-tooltip-rbi'>当前无最新数据<br/>深刻搭街坊很多事空间符合考多少分看电视剧回复肯定是<br/>十大科技发货速度快就符合考多少分活动开始<br/>上空的飞机黑色短裤肺结核的伤口缝合肯定是开始的<br/>斯达克警方很快圣诞节符合空手道解放和看电视讲话<br/>山豆根山豆根山豆根的上空经过拉开圣诞节了多少</div>"
-              );
-              tooltip.update();
-            }, 500);
-          });
-        switch (feature.properties.deviceTypeName || "Other") {
-          case "风机":
-            layer.addTo(groupFJ);
-            break;
-          case "电机":
-            layer.addTo(groupDJ);
-            break;
-          default:
-            layer.addTo(groupOther);
-            break;
-        }
-      },
-      style: function (feature) {
-        return feature.properties && feature.properties.style;
-      }
-    });
-    mcgLayerSupportGroup
-      .addLayer(geoJsonLayer)
-      .checkIn([groupFJ, groupDJ, groupOther])
-      .on('clustermouseover', function (e) {
-        L.popup({
-            opacity: 0.5
-          })
-          .setLatLng(e.latlng)
-          .setContent("坐标：" + e.latlng.toString() + "<br/>设备数：" + e.layer.getAllChildMarkers().length)
-          .openOn(map);
+		document.addEventListener('DOMContentLoaded', function () {
+			// 初始化图标
+			initIcon();
+			// 初始化数据
+			getProjs();
+		});
 
-        console.log(e.layer.getAllChildMarkers());
+		function initIcon() {
+			rbiIcon = leafletHelper.getIcon();
+		}
 
-      });
-    map.addLayer(mcgLayerSupportGroup);
-    map.fitBounds(mcgLayerSupportGroup.getBounds());
-    // mcgLayerSupportGroup.checkIn([groupFJ, groupDJ, groupOther]).on('clustermouseover', function (e) {
-    //   L.popup()
-    //     .setLatLng(e.latlng)
-    //     .setContent("坐标：" + e.latlng.toString() + "<br/>设备数：" + e.layer.getAllChildMarkers().length)
-    //     .openOn(map);
+		// 后台操作
+		var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport(),
+			layerGroup = L.featureGroup();
+		function getProjs() {
+			leafletHelper.getProjs(mapApi + (leafletHelper.getUrlParam("userId") || "-1"), function (arrLayer) {
+				arrLayer.forEach(function (layer) {
+					layer
+						.bindTooltip("loading...", {
+							direction: "top",
+							opacity: 1
+						})
+						.bindContextMenu({
+							contextmenu: true,
+							contextmenuWidth: 140,
+							contextmenuItems: [{
+								text: '打开组态页面',
+								icon: 'css/images/Advertisement.png',
+								callback: openKsPage
+							}]
+						}).on("click", function (e) {
+							// openKsPage();
+						}).on("tooltipopen", function (e) {
+							var tooltip = e.target.getTooltip();
+							tooltip.setContent("loading...");
+							tooltip.update();
+							setTimeout(function () {
+								tooltip.setContent(
+									"<div class='leaflet-tooltip-rbi'>当前无最新数据<br/>深刻搭街坊很多事空间符合考多少分看电视剧回复肯定是<br/>十大科技发货速度快就符合考多少分活动开始<br/>上空的飞机黑色短裤肺结核的伤口缝合肯定是开始的<br/>斯达克警方很快圣诞节符合空手道解放和看电视讲话<br/>山豆根山豆根山豆根的上空经过拉开圣诞节了多少</div>"
+								);
+								tooltip.update();
+							}, 500);
+						});
+					layer.addTo(layerGroup);
+				});
 
-    //   console.log(e.layer.getAllChildMarkers());
+				mcgLayerSupportGroup
+					.addLayer(layerGroup)
+					.on('clustermouseover', function (e) {
+						L.popup({
+							opacity: 0.5
+						})
+							.setLatLng(e.latlng)
+							.setContent("坐标：" + e.latlng.toString() + "<br/>设备数：" + e.layer.getAllChildMarkers().length)
+							.openOn(map);
 
-    // });
+						console.log(e.layer.getAllChildMarkers());
 
+					});
+				map.addLayer(mcgLayerSupportGroup);
+				map.fitBounds(mcgLayerSupportGroup.getBounds());
+			});
+		}
 
+		var sensorData = [{
+			id: 10,
+			data_I: {
+				IA: 10,
+				IB: 5.6,
+				IC: 21.1
+			},
+			data_U: {
+				UA: 250,
+				UB: 220,
+				UC: 320
+			}
+		}];
 
-    L.control.layers({
-      "百度地图": baiduTile,
-      "谷歌地图": googleTile
-    }, {
-      "风机": groupFJ,
-      "电机": groupDJ,
-      "其他": groupOther
-    }).addTo(map);
+		var baseLayers = {
+			"百度平面地图": baiduTile,
+			"谷歌卫星地图": googleTile
+		};
+		var overlays = {};
 
-    groupFJ.addTo(map); // Adding to map or to AutoMCG are now equivalent.
-    groupDJ.addTo(map);
-    groupOther.addTo(map);
+		L.control.layers(baseLayers, overlays).addTo(map);
 
-    function sayHello(value) {
-      alert("当前值：" + value);
-    }
-  </script>
+		function sayHello(value) {
+			alert("当前值：" + value);
+		}
+	</script>
 
 </body>
 

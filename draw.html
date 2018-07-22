@@ -2,465 +2,365 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible"
-        content="ie=edge">
-  <title>鼠标绘制工具</title>
-  <link rel="stylesheet"
-        href="./css/leaflet.css">
-  <link rel="stylesheet"
-        href="./css/leaflet.draw.css">
-  <!--Import Google Icon Font-->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-        rel="stylesheet">
-  <link href="https://cdn.bootcss.com/materialize/1.0.0-rc.1/css/materialize.min.css"
-        rel="stylesheet">
-  <link rel="stylesheet"
-        href="./css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible"
+          content="ie=edge">
+    <title>鼠标绘制工具</title>
+    <link rel="stylesheet"
+          href="./css/leaflet.css">
+    <link rel="stylesheet"
+          href="./css/leaflet.draw.css">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link href="https://cdn.bootcss.com/materialize/1.0.0-rc.1/css/materialize.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="./css/style.css">
 </head>
 
 <body>
-  <div id="map"></div>
+    <div id="map"></div>
 
-  <div id="slide-out"
-       class="sidenav">
-    <ul class="collapsible"
-        data-bind="with: proj">
-      <li class="active">
-        <div class="collapsible-header">
-          <i class="material-icons">devices</i>设备信息</div>
-        <div class="collapsible-body">
-          <input type="text"
-                 data-bind="value: layerId"
-                 hidden/>
-          <table class="bordered striped">
-            <tbody>
-              <tr class="style-row">
-                <th>设备ID：</th>
-                <td>
-                  <input type="number"
-                         min="1"
-                         step="1"
-                         data-bind="value: name" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>设备名称：</th>
-                <td>
-                  <input type="text"
-                         data-bind="value: PrjName" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>区域名称：</th>
-                <td>
-                  <input type="text"
-                         data-bind="value: AreaName" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>是否有用：</th>
-                <td>
-                  <label>
-                    <input type="checkbox"
-                           data-bind="checked: InUse" />
-                    <span>&nbsp;</span>
-                  </label>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </li>
-      <li class="active">
-        <div class="collapsible-header">
-          <i class="material-icons">style</i>设备样式</div>
-        <div class="collapsible-body">
-          <table class="bordered striped">
-            <tbody>
-              <tr class="style-row">
-                <th>边框颜色：</th>
-                <td>
-                  <input type="color"
-                         data-bind="value: StrokeColor" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>边框宽度：</th>
-                <td>
-                  <input type="number"
-                         min="0"
-                         step="0.1"
-                         value="2"
-                         data-bind="value: StrokeWeight" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>边框透明度：</th>
-                <td>
-                  <input type="number"
-                         min="0"
-                         max="1"
-                         step="0.1"
-                         data-bind="value: StrokeOpacity" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>填充颜色：</th>
-                <td>
-                  <input type="color"
-                         data-bind="value: FillColor" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>填充透明度：</th>
-                <td>
-                  <input type="number"
-                         min="0"
-                         max="1"
-                         step="0.1"
-                         data-bind="value: FillOpacity" />
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>常态图标：</th>
-                <td>
-                  <select data-bind="
-                          options: $root.icons, 
-                          optionsValue: 'iconName',
-                          optionsText: 'iconName',
-                          value: IconFile, 
-                          optionsAfterRender: $root.setIconOption"></select>
-                </td>
-              </tr>
-              <tr class="style-row">
-                <th>报警图标：</th>
-                <td>
-                  <select data-bind="
-                          options: $root.icons, 
-                          optionsValue: 'iconName',
-                          optionsText: 'iconName',
-                          value: GIFFile, 
-                          optionsAfterRender: $root.setIconOption"></select>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <a class="waves-effect waves-light btn"
-             data-bind="click: $root.save">
-            <i class="material-icons left">cloud</i>保存</a>
-        </div>
-      </li>
-    </ul>
-  </div>
+    <div id="slide-out"
+         class="sidenav">
+        <ul class="collapsible"
+            data-bind="with: proj">
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">devices</i>设备信息</div>
+                <div class="collapsible-body">
+                    <input type="text"
+                           data-bind="value: layerId"
+                           hidden/>
+                    <table class="bordered striped">
+                        <tbody>
+                            <tr class="style-row">
+                                <th>设备ID：</th>
+                                <td>
+                                    <input type="number"
+                                           min="1"
+                                           step="1"
+                                           data-bind="value: KID" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>设备名称：</th>
+                                <td>
+                                    <input type="text"
+                                           data-bind="value: PrjName" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>区域名称：</th>
+                                <td>
+                                    <input type="text"
+                                           data-bind="value: AreaName" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>是否有用：</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox"
+                                               data-bind="checked: InUse" />
+                                        <span>&nbsp;</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+            <li class="active">
+                <div class="collapsible-header">
+                    <i class="material-icons">style</i>设备样式</div>
+                <div class="collapsible-body">
+                    <table class="bordered striped">
+                        <tbody>
+                            <tr class="style-row">
+                                <th>边框颜色：</th>
+                                <td>
+                                    <input type="color"
+                                           data-bind="value: StrokeColor" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框宽度：</th>
+                                <td>
+                                    <input type="number"
+                                           min="0"
+                                           step="0.1"
+                                           value="2"
+                                           data-bind="value: StrokeWeight" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>边框透明度：</th>
+                                <td>
+                                    <input type="number"
+                                           min="0"
+                                           max="1"
+                                           step="0.1"
+                                           data-bind="value: StrokeOpacity" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充颜色：</th>
+                                <td>
+                                    <input type="color"
+                                           data-bind="value: FillColor" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>填充透明度：</th>
+                                <td>
+                                    <input type="number"
+                                           min="0"
+                                           max="1"
+                                           step="0.1"
+                                           data-bind="value: FillOpacity" />
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>常态图标：</th>
+                                <td>
+                                    <select data-bind="
+                                            options: $root.icons, 
+                                            optionsValue: 'iconName',
+                                            optionsText: 'iconName',
+                                            value: IconFile, 
+                                            optionsAfterRender: $root.setIconOption"></select>
+                                </td>
+                            </tr>
+                            <tr class="style-row">
+                                <th>报警图标：</th>
+                                <td>
+                                    <select data-bind="
+                                            options: $root.icons, 
+                                            optionsValue: 'iconName',
+                                            optionsText: 'iconName',
+                                            value: GIFFile, 
+                                            optionsAfterRender: $root.setIconOption"></select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="waves-effect waves-light btn"
+                       data-bind="click: $root.save">
+                        <i class="material-icons left">cloud</i>保存</a>
+                </div>
+            </li>
+        </ul>
+    </div>
 
-  <script src="./js/leaflet-src.js"></script>
-  <!-- 地图标注 -->
-  <script src="./js/leaflet.draw-src.js"></script>
-  <!-- materialize -->
-  <script src="https://cdn.bootcss.com/materialize/1.0.0-rc.1/js/materialize.min.js"></script>
-  <!-- jquery -->
-  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-  <!-- knockout -->
-  <script src="./js/knockout-3.5.0rc.js"></script>
-  <script src="./js/knockout.mapping-latest.js"></script>
-  <script>
-    var baseUrl = "http://localhost:52734/",
-      baiduUri = baseUrl + "/GisMap/{id}/{z}/{x}/{y}.png",
-      mapApi = baseUrl + "/api/Proj/";
-    var baiduTile = new L.TileLayer(baiduUri, { id: '788865972' });
-    var googleTile = new L.TileLayer(baiduUri, { id: '788865972' });
-    var isGoogleActive = false;
-    var iconArray = [
-      { iconName: "Default", iconFile: "./css/images/marker-icon.png" },
-      { iconName: "Air", iconFile: "./css/images/icon/Air.png" },
-      { iconName: "Airport", iconFile: "./css/images/icon/Airport.png" },
-      { iconName: "Fire", iconFile: "./css/images/icon/Fire.png" },
-      { iconName: "Fire_Station", iconFile: "./css/images/icon/Fire_Station.png" },
-      { iconName: "Gas", iconFile: "./css/images/icon/Gas.png" },
-      { iconName: "Water", iconFile: "./css/images/icon/Water.png" }
-    ];
+    <script src="./js/leaflet-src.js"></script>
+    <!-- 地图标注 -->
+    <script src="./js/leaflet.draw-src.js"></script>
+    <!-- materialize -->
+    <script src="https://cdn.bootcss.com/materialize/1.0.0-rc.1/js/materialize.min.js"></script>
+    <!-- jquery -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- knockout -->
+    <script src="./js/knockout-3.5.0rc.js"></script>
+    <script src="./js/knockout.mapping-latest.js"></script>
+    <script src="./js/leaflet.helper.js"></script>
+    <script>
+        var baseUrl = "http://localhost:52734/",
+            tileUri = baseUrl + "/GisMap/{id}/{z}/{x}/{y}.png",
+            mapApi = baseUrl + "/api/Proj/";
+        var baiduTile = new L.TileLayer(tileUri, { id: '788865972' });
+        var googleTile = new L.TileLayer(tileUri, { id: '788865972' });
+        var isGoogleActive = false;
 
-    var rbiIcon = {},
-      sideNav;
+        var rbiIcon = {},
+            sideNav;
 
-    // 初始化地图
-    var map = L.map('map', {
-      attributionControl: false,
-      center: [24.520868, 118.188236],
-      doubleClickZoom: false, //禁用双击放大
-      editable: true, //启动编辑
-      zoom: 16,
-      maxZoom: 18,
-      layers: [baiduTile]
-    });
-    map.zoomControl.setPosition("bottomright")
-
-    var baseLayers = {
-      "百度平面地图": baiduTile,
-      "谷歌卫星地图": googleTile
-    };
-    L.control.layers(baseLayers, null).addTo(map);
-    // 加载数据
-    var drawnItems = L.featureGroup()
-      .on('click', showConfig)
-      .addTo(map);
-
-    // 添加绘图toolbar
-    map.addControl(new L.Control.Draw({
-      edit: {
-        featureGroup: drawnItems
-      },
-      draw: {
-        //禁用圆形标记
-        circlemarker: false,
-        circle: false
-      }
-    }));
-
-    // 事件响应
-    map.on(L.Draw.Event.CREATED, drawCreated)
-      .on(L.Draw.Event.EDITED, drawEdited)
-      .on(L.Draw.Event.DELETED, drawDeleted)
-      .on('baselayerchange', function (e) {
-        console.log("layer改变了", e.layer);
-      });
-
-    function drawCreated(e) {
-      var layer = e.layer;
-      layer.proj = L.extend({}, {
-        ID: "",
-        KID: "",
-        PrjName: "",
-        AreaType: "",
-        AreaName: "",
-        InUse: true,
-        Points: "",
-        GooglePoints: "",
-        GIFFile: "",
-        IconFile: "Default",
-        StrokeWeight: "",
-        StrokeColor: "",
-        StrokeOpacity: "",
-        FillOpacity: "",
-        FillColor: "",
-      }, {
-          AreaType: e.layerType,
-          Points: latlngToPoints(layer),
-          StrokeWeight: layer.options.weight || "",
-          StrokeColor: layer.options.color || L.Polyline.prototype.options.color,
-          StrokeOpacity: layer.options.opacity || 1,
-          FillOpacity: layer.options.fillOpacity || 1,
-          FillColor: layer.options.fillColor || layer.options.color || L.Polyline.prototype.options
-            .color
+        // 初始化地图
+        var map = L.map('map', {
+            attributionControl: false,
+            center: [24.520868, 118.188236],
+            doubleClickZoom: false, //禁用双击放大
+            editable: true, //启动编辑
+            zoom: 16,
+            maxZoom: 18,
+            layers: [baiduTile]
         });
-      layer.addTo(drawnItems);
+        map.zoomControl.setPosition("bottomright")
 
-      addProj(layer).done(function (data) {
-        layer.proj.ID = data.ID;
-        // 默认展开配置项
-        showConfig(e);
-      });
-    }
-    function drawEdited(e) {
-      // 获取当前编辑项
-      var editLayers = e.layers.getLayers();
-      editLayers.forEach(function (layer) {
-        layer.proj.Points = latlngToPoints(layer);
-        updateProj(layer);
-      });
-    }
-    function drawDeleted(e) {
-      // 获取当前删除项
-      var delLayers = e.layers.getLayers();
-      delLayers.forEach(function (layer) {
-        layer.proj.Points = latlngToPoints(layer);
-        deleteProj(layer);
-      });
-    }
+        var baseLayers = {
+            "百度平面地图": baiduTile,
+            "谷歌卫星地图": googleTile
+        };
+        L.control.layers(baseLayers, null).addTo(map);
+        // 加载数据
+        var drawnItems = L.featureGroup()
+            .on('click', showConfig)
+            .addTo(map);
 
-    document.addEventListener('DOMContentLoaded', function () {
-      // 初始化图标
-      initIcon();
-      //初始化Materialize组件
-      initMaterialize();
-      // 初始化数据
-      getProjs();
-    });
-
-    function initIcon() {
-      iconArray.forEach(function (o) {
-        rbiIcon[o.iconName] = L.icon({
-          "iconUrl": o.iconFile,
-          "iconSize": [35, 35],
-          "iconAnchor": [12, 35],
-          "popupAnchor": [0, -35],
-          "shadowUrl": "./css/images/marker-shadow.png",
-          "shadowSize": [41, 41]
-        });
-      });
-      rbiIcon["Default"] = L.icon({
-        "iconUrl": "./css/images/marker-icon.png",
-        "iconRetinaUrl": "./css/images/marker-icon-2x.png",
-        "shadowUrl": "./css/images/marker-shadow.png",
-        "iconSize": [25, 41],
-        "iconAnchor": [12, 41],
-        "popupAnchor": [1, -34],
-        "tooltipAnchor": [16, -28],
-        "shadowSize": [41, 41]
-      });
-    }
-
-    function initMaterialize() {
-      // 侧边栏
-      M.Sidenav.init(document.querySelectorAll('.sidenav'), {
-        edge: "right"
-      });
-      var slideElem = document.getElementById("slide-out");
-      sideNav = M.Sidenav.getInstance(slideElem);
-
-      // 折叠面板
-      M.Collapsible.init(document.querySelectorAll('.collapsible'), {
-        accordion: false
-      });
-
-      // 下拉框
-      M.FormSelect.init(document.querySelectorAll('select'), {});
-    }
-
-    // 将经纬度坐标转换成字符串
-    function latlngToPoints(layer) {
-      var latlngs = [],
-        points = "";
-      if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-        latlngs = layer.getLatLngs()[0];
-        points = latlngs.map(function (o) {
-          return o.lat + "," + o.lng;
-        }).join(";");
-      } else if (layer instanceof L.Polyline) {
-        latlngs = layer.getLatLngs();
-        points = latlngs.map(function (o) {
-          return o.lat + "," + o.lng;
-        }).join(";");
-      } else if (layer instanceof L.Marker) {
-        latlngs = layer.getLatLng();
-        points = latlngs.lat + "," + latlngs.lng;
-      }
-      return points;
-    }
-
-    // 将字符串转换成经纬度坐标
-    function pointToLaglngs(data) {
-      var latlngs = [];
-      switch (data.AreaType) {
-        case "circle":
-        case "marker":
-          latlngs = data.Points.split(",");
-          break;
-        default:
-          latlngs = data.Points.split(";").map(function (o) {
-            return o.split(",")
-          });
-          break;
-      }
-      return latlngs;
-    }
-
-    function showConfig(e) {
-      var layer = e.layer;
-      var proj = layer.proj;
-      proj.layerId = layer._leaflet_id;
-      var ViewModel = function () {
-        var self = this;
-        self.proj = ko.mapping.fromJS(proj);
-        self.icons = ko.observableArray(iconArray);
-        self.setIconOption = function (option, item) {
-          $(option).attr('data-icon', item.iconFile);
-        }
-        self.save = function (e) {
-          //更新数据
-          var data = ko.mapping.toJS(e);
-          var layer = drawnItems.getLayer(data.layerId);
-          L.extend(layer.proj, data);
-
-          updateProj(layer).done(function () {
-            //设置图层样式
-            if (layer["setStyle"]) {
-              layer.setStyle({
-                "color": data.StrokeColor,
-                "weight": data.StrokeWeight,
-                "opacity": data.StrokeOpacity,
-                "fillColor": data.FillColor,
-                "fillOpacity": data.FillOpacity
-              });
+        // 添加绘图toolbar
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                //禁用圆形标记
+                circlemarker: false,
+                circle: false
             }
-            if (layer["setIcon"]) {
-              layer.setIcon(rbiIcon[data.IconFile]);
-            }
+        }));
 
-            // 关闭侧边栏
-            sideNav.close();
-          });
-        }
-      }
-      ko.cleanNode(document.getElementById("slide-out"));
-      ko.applyBindings(new ViewModel(), document.getElementById("slide-out"));
-
-      initMaterialize();
-      sideNav.open();
-    }
-
-    // 后台操作
-
-    function ajaxHelper(uri, method, data) {
-      return $.ajax({
-        type: method,
-        url: uri,
-        dataType: 'json',
-        contentType: 'application/json',
-        data: data ? JSON.stringify(data) : null
-      }).fail(function (jqXHR, textStatus, errorThrown) {
-        console.error(errorThrown);
-      });
-    }
-
-    function getProjs() {
-      ajaxHelper(mapApi, 'GET').done(function (data) {
-        data.forEach(function (item) {
-          var latlngs = pointToLaglngs(item);
-          var layer = L[item.AreaType](latlngs, item).addTo(drawnItems);
-          layer.proj = item;
-
-          if (layer["setStyle"]) {
-            layer.setStyle({
-              "color": item.StrokeColor,
-              "weight": item.StrokeWeight,
-              "opacity": item.StrokeOpacity,
-              "fillColor": item.FillColor,
-              "fillOpacity": item.FillOpacity
+        // 事件响应
+        map.on(L.Draw.Event.CREATED, drawCreated)
+            .on(L.Draw.Event.EDITED, drawEdited)
+            .on(L.Draw.Event.DELETED, drawDeleted)
+            .on('baselayerchange', function (e) {
+                console.log("layer改变了", e.layer);
             });
-          }
-          if (layer["setIcon"] && item.IconFile) {
-            layer.setIcon(rbiIcon[item.IconFile]);
-          }
+
+        function drawCreated(e) {
+            var layer = e.layer;
+            var defaults = {
+                ID: "",
+                KID: "",
+                PrjName: "",
+                AreaType: "",
+                AreaName: "",
+                InUse: true,
+                Points: "",
+                GooglePoints: "",
+                GIFFile: "",
+                IconFile: "Default",
+                StrokeWeight: "",
+                StrokeColor: "",
+                StrokeOpacity: "",
+                FillOpacity: "",
+                FillColor: "",
+            };
+            var options = {
+                AreaType: e.layerType,
+                Points: leafletHelper.latlngToPoints(layer),
+                StrokeWeight: layer.options.weight || "",
+                StrokeColor: layer.options.color || L.Polyline.prototype.options.color,
+                StrokeOpacity: layer.options.opacity || 1,
+                FillOpacity: layer.options.fillOpacity || 1,
+                FillColor: layer.options.fillColor || layer.options.color || L.Polyline.prototype.options
+                    .color
+            };
+
+            layer.proj = L.extend({}, defaults, options);
+            layer.addTo(drawnItems);
+
+            addProj(layer).done(function (data) {
+                layer.proj.ID = data.ID;
+                // 默认展开配置项
+                showConfig(e);
+            });
+        }
+        function drawEdited(e) {
+            // 获取当前编辑项
+            var editLayers = e.layers.getLayers();
+            editLayers.forEach(function (layer) {
+                layer.proj.Points = leafletHelper.latlngToPoints(layer);
+                updateProj(layer);
+            });
+        }
+        function drawDeleted(e) {
+            // 获取当前删除项
+            var delLayers = e.layers.getLayers();
+            delLayers.forEach(function (layer) {
+                layer.proj.Points = leafletHelper.latlngToPoints(layer);
+                deleteProj(layer);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化图标
+            initIcon();
+            //初始化Materialize组件
+            initMaterialize();
+            // 初始化数据
+            getProjs();
         });
-      });
-    }
 
-    function addProj(layer) {
-      return ajaxHelper(mapApi, 'POST', layer.proj);
-    }
+        function initIcon() {
+            rbiIcon = leafletHelper.getIcon();
+        }
 
-    function updateProj(layer) {
-      return ajaxHelper(mapApi + layer.proj.ID, 'PUT', layer.proj);
-    }
+        function initMaterialize() {
+            // 侧边栏
+            M.Sidenav.init(document.querySelectorAll('.sidenav'), {
+                edge: "right"
+            });
+            var slideElem = document.getElementById("slide-out");
+            sideNav = M.Sidenav.getInstance(slideElem);
 
-    function deleteProj(layer) {
-      return ajaxHelper(mapApi + layer.proj.ID, 'DELETE');
-    }
-  </script>
+            // 折叠面板
+            M.Collapsible.init(document.querySelectorAll('.collapsible'), {
+                accordion: false
+            });
+
+            // 下拉框
+            M.FormSelect.init(document.querySelectorAll('select'), {});
+        }
+
+        function showConfig(e) {
+            var layer = e.layer;
+            var proj = layer.proj;
+            proj.layerId = layer._leaflet_id;
+            var ViewModel = function () {
+                var self = this;
+                self.proj = ko.mapping.fromJS(proj);
+                self.icons = ko.observableArray(leafletHelper.iconArray);
+                self.setIconOption = function (option, item) {
+                    $(option).attr('data-icon', item.iconFile);
+                }
+                self.save = function (e) {
+                    //更新数据
+                    var data = ko.mapping.toJS(e);
+                    var layer = drawnItems.getLayer(data.layerId);
+                    L.extend(layer.proj, data);
+
+                    updateProj(layer).done(function () {
+                        //设置图层样式
+                        leafletHelper.updateLayer(layer, data);
+
+                        // 关闭侧边栏
+                        sideNav.close();
+                    });
+                }
+
+                initMaterialize();
+            }
+            ko.cleanNode(document.getElementById("slide-out"));
+            ko.applyBindings(new ViewModel(), document.getElementById("slide-out"));
+
+            sideNav.open();
+        }
+
+        // 后台操作
+        function getProjs() {
+            leafletHelper.getProjs(mapApi, function (arrLayer) {
+                arrLayer.forEach(function (layer) {
+                    layer.addTo(drawnItems);
+                });
+            });
+        }
+
+        function addProj(layer) {
+            return leafletHelper.ajaxHelper(mapApi, 'POST', layer.proj);
+        }
+
+        function updateProj(layer) {
+            return leafletHelper.ajaxHelper(mapApi + layer.proj.ID, 'PUT', layer.proj);
+        }
+
+        function deleteProj(layer) {
+            return leafletHelper.ajaxHelper(mapApi + layer.proj.ID, 'DELETE');
+        }
+    </script>
 </body>
 
 </html>
