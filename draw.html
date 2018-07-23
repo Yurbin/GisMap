@@ -331,12 +331,11 @@
                         sideNav.close();
                     });
                 }
-
-                initMaterialize();
             }
             ko.cleanNode(document.getElementById("slide-out"));
             ko.applyBindings(new ViewModel(), document.getElementById("slide-out"));
 
+            initMaterialize();
             sideNav.open();
         }
 

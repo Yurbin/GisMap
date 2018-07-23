@@ -1,4 +1,4 @@
-var leafletHelper = (function() {
+var leafletHelper = (function () {
     var iconArray = [
         { iconName: "Default", iconFile: "../css/images/marker-icon.png" },
         { iconName: "Air", iconFile: "../css/images/icon/Air.png" },
@@ -13,21 +13,22 @@ var leafletHelper = (function() {
     ];
 
     return {
-        getUrlParam: function(name) {
+        getUrlParam: function (name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
             var r = decodeURI(window.location.search.substr(1)).match(reg); //匹配目标参数
             if (r != null) return unescape(r[2]);
             return null; //返回参数值
         },
         iconArray: iconArray,
-        getIcon: function() {
+        getIcon: function () {
             var rbiIcon = {};
-            iconArray.forEach(function(o) {
+            iconArray.forEach(function (o) {
                 rbiIcon[o.iconName] = L.icon({
                     iconUrl: o.iconFile,
                     iconSize: [35, 35],
                     iconAnchor: [12, 35],
                     popupAnchor: [0, -35],
+                    tooltipAnchor: [16, -28],
                     shadowUrl: "../css/images/marker-shadow.png",
                     shadowSize: [41, 41]
                 });
@@ -45,20 +46,20 @@ var leafletHelper = (function() {
             return rbiIcon;
         },
         // 将经纬度坐标转换成字符串
-        latlngToPoints: function(layer) {
+        latlngToPoints: function (layer) {
             var latlngs = [],
                 points = "";
             if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
                 latlngs = layer.getLatLngs()[0];
                 points = latlngs
-                    .map(function(o) {
+                    .map(function (o) {
                         return o.lat + "," + o.lng;
                     })
                     .join(";");
             } else if (layer instanceof L.Polyline) {
                 latlngs = layer.getLatLngs();
                 points = latlngs
-                    .map(function(o) {
+                    .map(function (o) {
                         return o.lat + "," + o.lng;
                     })
                     .join(";");
@@ -69,7 +70,7 @@ var leafletHelper = (function() {
             return points;
         },
         // 将字符串转换成经纬度坐标
-        pointToLaglngs: function(data) {
+        pointToLaglngs: function (data) {
             var latlngs = [];
             switch (data.AreaType) {
                 case "circle":
@@ -77,14 +78,14 @@ var leafletHelper = (function() {
                     latlngs = data.Points.split(",");
                     break;
                 default:
-                    latlngs = data.Points.split(";").map(function(o) {
+                    latlngs = data.Points.split(";").map(function (o) {
                         return o.split(",");
                     });
                     break;
             }
             return latlngs;
         },
-        updateLayer: function(layer, data) {
+        updateLayer: function (layer, data) {
             if (layer["setStyle"]) {
                 layer.setStyle({
                     color: data.StrokeColor,
@@ -98,7 +99,7 @@ var leafletHelper = (function() {
                 layer.setIcon(rbiIcon[data.IconFile]);
             }
         },
-        ajaxHelper: function(uri, method, data) {
+        ajaxHelper: function (uri, method, data) {
             return $
                 .ajax({
                     type: method,
@@ -107,15 +108,15 @@ var leafletHelper = (function() {
                     contentType: "application/json",
                     data: data ? JSON.stringify(data) : null
                 })
-                .fail(function(jqXHR, textStatus, errorThrown) {
+                .fail(function (jqXHR, textStatus, errorThrown) {
                     console.error(errorThrown);
                 });
         },
-        getProjs: function(url, callBack) {
+        getProjs: function (url, callBack) {
             var self = this;
-            self.ajaxHelper(url, "GET").done(function(data) {
+            self.ajaxHelper(url, "GET").done(function (data) {
                 var arrLayer = [];
-                data.forEach(function(item) {
+                data.forEach(function (item) {
                     var latlngs = self.pointToLaglngs(item);
                     var layer = L[item.AreaType](latlngs, item);
                     layer.proj = item;

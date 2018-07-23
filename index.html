@@ -115,14 +115,19 @@
 								callback: openKsPage
 							}]
 						}).on("click", function (e) {
-							// openKsPage();
+							openKsPage();
 						}).on("tooltipopen", function (e) {
+							var proj = e.target.proj;
 							var tooltip = e.target.getTooltip();
 							tooltip.setContent("loading...");
 							tooltip.update();
 							setTimeout(function () {
 								tooltip.setContent(
-									"<div class='leaflet-tooltip-rbi'>当前无最新数据<br/>深刻搭街坊很多事空间符合考多少分看电视剧回复肯定是<br/>十大科技发货速度快就符合考多少分活动开始<br/>上空的飞机黑色短裤肺结核的伤口缝合肯定是开始的<br/>斯达克警方很快圣诞节符合空手道解放和看电视讲话<br/>山豆根山豆根山豆根的上空经过拉开圣诞节了多少</div>"
+									"<div class='leaflet-tooltip-rbi'>" +
+									"设备ID：" + (proj.KID || "无") +
+									"；设备名称：" + (proj.PrjName || "无") +
+									"；区域名称：" + (proj.AreaName || "无") +
+									"</div>"
 								);
 								tooltip.update();
 							}, 500);
